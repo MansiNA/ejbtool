@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>ch.martinelli.demo</groupId>
-    <artifactId>vaadin-keycloak</artifactId>
+    <artifactId>ejbtool</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
     <properties>
