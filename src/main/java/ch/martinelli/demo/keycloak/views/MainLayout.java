@@ -77,6 +77,15 @@ public class MainLayout extends AppLayout {
         if (accessChecker.hasAccess(AdminView.class)) {
             nav.addItem(new AppNavItem("Admin", AdminView.class, "la la-users"));
         }
+        if (accessChecker.hasAccess(CockpitView.class)) {
+            nav.addItem(new AppNavItem("CockpitView", CockpitView.class, "la la-users"));
+        }
+        if (accessChecker.hasAccess(MailboxConfigView.class)) {
+            nav.addItem(new AppNavItem("Mailbox Verwaltung", MailboxConfigView.class, "la la-users"));
+        }
+        if (accessChecker.hasAccess(MessageExportView.class)) {
+            nav.addItem(new AppNavItem("MessageExport", MessageExportView.class, "la la-users"));
+        }
 
         return nav;
     }
