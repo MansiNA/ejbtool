@@ -31,13 +31,17 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.richtexteditor.RichTextEditor;
 import com.vaadin.flow.component.richtexteditor.RichTextEditorVariant;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.wontlost.ckeditor.Config;
+import com.wontlost.ckeditor.Constants;
 import jakarta.annotation.security.RolesAllowed;
 
 import org.json.JSONArray;
@@ -65,6 +69,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import com.wontlost.ckeditor.VaadinCKEditor;
+import com.wontlost.ckeditor.VaadinCKEditorBuilder;
 
 @PageTitle("eKP-Cokpit | by DBUSS GmbH")
 @Route(value = "cockpit", layout= MainLayout.class)
@@ -649,9 +655,10 @@ public class CockpitView extends VerticalLayout{
             addItem("edit", e -> e.getItem().ifPresent(monitor -> {
                 System.out.printf("Edit: %s%n", monitor.getID());
 
-                form.setVisible(true);
-                form.setContact(monitor);
+             //   form.setVisible(true);
+              //  form.setContact(monitor);
 
+                showEditDialog(monitor);
 
             }));
 
@@ -923,9 +930,184 @@ private static VerticalLayout showDialog(fvm_monitoring Inhalt){
 
 }
 
+    private VerticalLayout showEditDialog(fvm_monitoring monitor){
+        VerticalLayout dialogLayout = new VerticalLayout();
+        Dialog dialog = new Dialog();
+        dialog.add(getTabsheet(monitor));
+      //  Button addButton = new Button("add");
+        Button cancelButton = new Button("Cancel");
+        // Add buttons to the footer
+        dialog.getFooter().add(cancelButton);
+      //  dialog.getFooter().add(addButton);
 
+        cancelButton.addClickListener(cancelEvent -> {
+            dialog.close(); // Close the confirmation dialog
+        });
 
-    private static VerticalLayout showEditDialog(fvm_monitoring Inhalt){
+        dialog.open();
+
+        return dialogLayout;
+
+    }
+    private TabSheet getTabsheet(fvm_monitoring monitor) {
+
+        TabSheet tabSheet = new TabSheet();
+
+        tabSheet.add("general", getGeneral(monitor));
+        tabSheet.add("SQL-Abfrage", getSqlAbfrage(monitor));
+        tabSheet.add("Beschreibung", getBeschreibung(monitor));
+        tabSheet.add("Handlungsinformationen", getHandlungsinformationen(monitor));
+
+        tabSheet.setSizeFull();
+        tabSheet.setHeightFull();
+
+        return tabSheet;
+    }
+
+    private Component getHandlungsinformationen(fvm_monitoring monitor) {
+        VerticalLayout content = new VerticalLayout();
+        VaadinCKEditor editor;
+        Button saveBtn = new Button("save");
+        Button editBtn = new Button("edit");
+        saveBtn.setVisible(false);
+        editBtn.setVisible(true);
+
+        Config config = new Config();
+        config.setBalloonToolBar(Constants.Toolbar.values());
+        config.setImage(new String[][]{},
+                "", new String[]{"full", "alignLeft", "alignCenter", "alignRight"},
+                new String[]{"imageTextAlternative", "|",
+                        "imageStyle:alignLeft",
+                        "imageStyle:full",
+                        "imageStyle:alignCenter",
+                        "imageStyle:alignRight"}, new String[]{});
+
+        editor = new VaadinCKEditorBuilder().with(builder -> {
+
+            builder.editorType = Constants.EditorType.CLASSIC;
+            builder.width = "95%";
+            builder.readOnly = true;
+            builder.hideToolbar=true;
+            builder.config = config;
+        }).createVaadinCKEditor();
+
+        editor.setReadOnly(true);
+        editor.getStyle().setMargin ("-5px");
+        editor.setValue(monitor.getHandlungs_INFO());
+
+        saveBtn.addClickListener((event -> {
+            editBtn.setVisible(true);
+            saveBtn.setVisible(false);
+            //editor.setReadOnly(true);
+            editor.setReadOnlyWithToolbarAction(!editor.isReadOnly());
+
+        }));
+
+        editBtn.addClickListener(e->{
+            editor.setReadOnlyWithToolbarAction(!editor.isReadOnly());
+            editBtn.setVisible(false);
+            saveBtn.setVisible(true);
+            //editor.setReadOnly(false);
+        });
+
+        content.add(editor,editBtn,saveBtn);
+
+        return content;
+    }
+
+    private Component getBeschreibung(fvm_monitoring monitor) {
+        VerticalLayout content = new VerticalLayout();
+        VaadinCKEditor editor;
+        Button saveBtn = new Button("save");
+        Button editBtn = new Button("edit");
+        saveBtn.setVisible(false);
+        editBtn.setVisible(true);
+
+        Config config = new Config();
+        config.setBalloonToolBar(Constants.Toolbar.values());
+        config.setImage(new String[][]{},
+                "", new String[]{"full", "alignLeft", "alignCenter", "alignRight"},
+                new String[]{"imageTextAlternative", "|",
+                        "imageStyle:alignLeft",
+                        "imageStyle:full",
+                        "imageStyle:alignCenter",
+                        "imageStyle:alignRight"}, new String[]{});
+
+        editor = new VaadinCKEditorBuilder().with(builder -> {
+
+            builder.editorType = Constants.EditorType.CLASSIC;
+            builder.width = "95%";
+            builder.readOnly = true;
+            builder.hideToolbar=true;
+            builder.config = config;
+        }).createVaadinCKEditor();
+
+        editor.setReadOnly(true);
+        editor.getStyle().setMargin ("-5px");
+        editor.setValue(monitor.getBeschreibung());
+
+        saveBtn.addClickListener((event -> {
+            editBtn.setVisible(true);
+            saveBtn.setVisible(false);
+            //editor.setReadOnly(true);
+            editor.setReadOnlyWithToolbarAction(!editor.isReadOnly());
+
+        }));
+
+        editBtn.addClickListener(e->{
+            editor.setReadOnlyWithToolbarAction(!editor.isReadOnly());
+            editBtn.setVisible(false);
+            saveBtn.setVisible(true);
+            //editor.setReadOnly(false);
+        });
+
+        content.add(editor,editBtn,saveBtn);
+
+        return content;
+    }
+
+    private Component getSqlAbfrage(fvm_monitoring monitor) {
+        VerticalLayout content = new VerticalLayout();
+        TextField abfrage = new TextField("SQL-Abfrage");
+        abfrage.setValue(monitor.getSQL());
+        abfrage.setWidthFull();
+
+        TextField detailabfrage = new TextField("SQL-Detail Abfrage");
+        detailabfrage.setValue(monitor.getSQL_Detail());
+        detailabfrage.setWidthFull();
+
+        content.add(abfrage, detailabfrage);
+        return content;
+    }
+
+    private Component getGeneral(fvm_monitoring monitor) {
+        VerticalLayout content = new VerticalLayout();
+        content.add(new H2("general"));
+
+        TextField titel = new TextField("Titel");
+        titel.setValue(monitor.getTitel());
+        titel.setWidthFull();
+
+        IntegerField intervall = new IntegerField("Check-Intervall");
+        IntegerField infoSchwellwert = new IntegerField("Warning Schwellwert");
+        IntegerField errorSchwellwert = new IntegerField("Error Schwellwert");
+        Checkbox checkbox = new Checkbox("aktiv");
+
+        intervall.setValue(monitor.getCheck_Intervall());
+        infoSchwellwert.setValue(monitor.getWarning_Schwellwert());
+        errorSchwellwert.setValue(monitor.getError_Schwellwert());
+        if(monitor.getIS_ACTIVE().equals("1")){
+            checkbox.setValue(true);
+        }
+
+        HorizontalLayout hr = new HorizontalLayout(intervall,infoSchwellwert,errorSchwellwert, checkbox);
+        hr.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
+
+        content.add(titel, hr);
+        return content;
+    }
+
+    private static VerticalLayout showEditDialogOld(fvm_monitoring Inhalt){
 
         VerticalLayout dialogInhalt = new VerticalLayout();
         TextField titel = new TextField("Titel");
